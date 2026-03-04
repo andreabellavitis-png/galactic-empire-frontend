@@ -13,6 +13,7 @@ function useGameApi() {
     loadSystems: ()         => api.get('/systems').then(r => r.data),
     loadSystem:  (id: string) => api.get(`/systems/${id}`).then(r => r.data),
     moveFleet:   (id: string, dest: string) => api.post(`/fleets/${id}/move`, { destination_id: dest }),
+    colonize:    (id: string) => api.post(`/bodies/${id}/colonize`).then(r => r.data),
   };
 }
 
@@ -493,6 +494,7 @@ export default function Game() {
           planet={selectedPlanet}
           empireId={empire?.id}
           onClose={() => setSelectedPlanet(null)}
+          onColonize={gameApi.colonize}
           onPlanetUpdate={(p) => {
             setSelectedPlanet(p);
             gameApi.loadEmpire().then(setEmpire);

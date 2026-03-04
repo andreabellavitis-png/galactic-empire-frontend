@@ -1,7 +1,7 @@
 // components/PlanetPanel.tsx
 // Pannello gestione pianeta completo — stile Sci-Fi Dark
 import { useState, useEffect } from 'react';
-import { useApi } from '../hooks/useApi';
+
 
 // ── Tipi ──────────────────────────────────────────────────────────
 interface Planet {
@@ -99,16 +99,15 @@ function ResourceRow({ icon, label, value, color }: { icon: string; label: strin
 type Tab = 'overview' | 'production' | 'buildings' | 'actions';
 
 // ── Componente principale ─────────────────────────────────────────
-export function PlanetPanel({ planet, onClose, empireId, onPlanetUpdate }: {
+export function PlanetPanel({ planet, onClose, empireId, onPlanetUpdate, onColonize }: {
   planet: Planet;
   onClose: () => void;
   empireId?: string;
   onPlanetUpdate?: (p: Planet) => void;
+  onColonize?: (planetId: string) => Promise<any>;
 }) {
-  const api = useApi();
   const [tab, setTab] = useState<Tab>('overview');
   const [colonizing, setColonizing] = useState(false);
-  const [buildQueue, setBuildQueue] = useState<string[]>([]);
   const [actionMsg, setActionMsg] = useState<{ text: string; ok: boolean } | null>(null);
 
   const status   = STATUS_META[planet.status] ?? STATUS_META.UNINHABITED;
@@ -132,12 +131,13 @@ export function PlanetPanel({ planet, onClose, empireId, onPlanetUpdate }: {
     : null;
 
   const handleColonize = async () => {
+    if (!onColonize) return;
     setColonizing(true);
     setActionMsg(null);
     try {
-      const res = await api.post(`/bodies/${planet.id}/colonize`);
+      const updated = await onColonize(planet.id);
       setActionMsg({ text: 'Colonizzazione avviata!', ok: true });
-      onPlanetUpdate?.(res.data);
+      if (updated) onPlanetUpdate?.(updated);
     } catch (e: any) {
       setActionMsg({ text: e?.response?.data?.message ?? 'Errore', ok: false });
     } finally {
