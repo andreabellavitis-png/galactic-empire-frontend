@@ -1,19 +1,16 @@
-// pages/Game.tsx
 import { useEffect, useState } from 'react';
 import { useGameStore } from '../store/game.store';
 import { useGameSocket } from '../hooks/useGameSocket';
-import { useApi } from '../hooks/useApi';
+import { Empires, Systems, Fleets, Planets } from '../hooks/useApi';
 import { PlanetPanel } from '../components/PlanetPanel';
 
-// ── API helpers ───────────────────────────────────────────────────
 function useGameApi() {
-  const api = useApi();
   return {
-    loadEmpire:  ()         => api.get('/empires/me').then(r => r.data),
-    loadSystems: ()         => api.get('/systems').then(r => r.data),
-    loadSystem:  (id: string) => api.get(`/systems/${id}`).then(r => r.data),
-    moveFleet:   (id: string, dest: string) => api.post(`/fleets/${id}/move`, { destination_id: dest }),
-    colonize:    (id: string) => api.post(`/bodies/${id}/colonize`).then(r => r.data),
+    loadEmpire:  ()           => Empires.me(),
+    loadSystems: ()           => Systems.list(),
+    loadSystem:  (id: string) => Systems.get(id),
+    moveFleet:   (id: string, dest: string) => Fleets.move(id, dest),
+    colonize:    (id: string) => Planets.colonize(id),
   };
 }
 
